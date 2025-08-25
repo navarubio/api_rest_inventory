@@ -3,7 +3,7 @@ package com.sismacontab.inventory.models;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "product_images", schema = "fdw_vegfarm")
+@Table(name = "product_images_read", schema = "fdw_vegfarm")
 public class ProductImage {
     
     @Id

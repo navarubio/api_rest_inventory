@@ -90,4 +90,32 @@ public class ProductCategorizacionController {
 
         return response;
     }
+
+    @GetMapping("/categorized")
+    public Map<String, Object> getProductsWithCompleteCategories(
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String categoriaPrincipal,
+            @RequestParam(required = false) String subcategoria1,
+            @RequestParam(required = false) String subcategoria2,
+            @RequestParam(required = false) String subcategoria3,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Page<ProductCategorizacion> pageResult = repository.findAllWithCompleteCategoriesAndFilters(
+                nombre,
+                categoriaPrincipal,
+                subcategoria1,
+                subcategoria2,
+                subcategoria3,
+                PageRequest.of(page, size)
+        );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", pageResult.getContent());
+        response.put("currentPage", pageResult.getNumber());
+        response.put("totalItems", pageResult.getTotalElements());
+        response.put("totalPages", pageResult.getTotalPages());
+
+        return response;
+    }
 }
