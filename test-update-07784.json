@@ -1,0 +1,7 @@
+{
+  "nombreProducto": "PRODUCTO 07784 - ACTUALIZADO VIA API REST",
+  "principioActivo": "Principio Activo Actualizado",
+  "nivelCompletacion": 85,
+  "patologia": "Patología actualizada mediante API REST de producción",
+  "usuarioUltimaModificacion": "api-test-user"
+}

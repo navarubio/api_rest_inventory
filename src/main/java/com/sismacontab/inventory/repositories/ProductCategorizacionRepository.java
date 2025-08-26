@@ -1,6 +1,8 @@
 package com.sismacontab.inventory.repositories;
 
 import com.sismacontab.inventory.models.ProductCategorizacion;
+import com.sismacontab.inventory.dto.VademecumSuggestionDTO;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -101,4 +103,18 @@ public interface ProductCategorizacionRepository extends JpaRepository<ProductCa
             @Param("subcategoria2") String subcategoria2,
             @Param("subcategoria3") String subcategoria3,
             Pageable pageable);
+
+    @Query(value = 
+    "SELECT " +
+    "principio_activo as principioActivo, " +
+    "patologia as patologia, " +
+    "posologia as posologia, " +
+    "contraindicaciones as contraindicaciones, " +
+    "sustituto_sugerido as sustitutoSugerido " +
+    "FROM fdw_vegfarm.products_categorizacion " +
+    "WHERE principio_activo ILIKE CONCAT('%', :principioActivo, '%') " +
+    "AND posologia IS NOT NULL AND posologia <> '' " +
+    "AND contraindicaciones IS NOT NULL AND contraindicaciones <> '' " +
+    "LIMIT 1", nativeQuery = true)
+    Optional<VademecumSuggestionDTO> findVademecumSuggestion(@Param("principioActivo") String principioActivo);
 }

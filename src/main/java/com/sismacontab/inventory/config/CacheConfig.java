@@ -15,11 +15,17 @@ public class CacheConfig {
     public CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
         cacheManager.setCaches(Arrays.asList(
+            // Caches existentes
             new ConcurrentMapCache("categoryList"),
             new ConcurrentMapCache("subcategoryList"),
             new ConcurrentMapCache("specific1List"),
             new ConcurrentMapCache("specific2List"),
-            new ConcurrentMapCache("hierarchyList")  // Added for hierarchy endpoint
+            new ConcurrentMapCache("hierarchyList"),
+            // Nuevos caches para atributos de productos
+            new ConcurrentMapCache("formasFarmaceuticasActivas"),
+            new ConcurrentMapCache("viasAdministracionActivas"),
+            new ConcurrentMapCache("poblacionesDianaActivas"),
+            new ConcurrentMapCache("tagsActivos")
         ));
         return cacheManager;
     }

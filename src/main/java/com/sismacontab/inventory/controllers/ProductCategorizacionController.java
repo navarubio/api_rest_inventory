@@ -1,10 +1,15 @@
 package com.sismacontab.inventory.controllers;
 
 import com.sismacontab.inventory.models.ProductCategorizacion;
+import com.sismacontab.inventory.models.dto.ProductoUpdateDTO;
 import com.sismacontab.inventory.repositories.ProductCategorizacionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -117,5 +122,70 @@ public class ProductCategorizacionController {
         response.put("totalPages", pageResult.getTotalPages());
 
         return response;
+    }
+
+    @PutMapping("/{codigoInterno}")
+    public ResponseEntity<ProductCategorizacion> updateProduct(
+            @PathVariable String codigoInterno,
+            @RequestBody ProductoUpdateDTO updateDTO) {
+        
+        // Buscar el producto existente
+        ProductCategorizacion producto = repository.findByCodigoInterno(codigoInterno);
+        if (producto == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Actualizar todos los campos del producto
+        updateProductFromDTO(producto, updateDTO);
+
+        // Guardar el producto actualizado
+        ProductCategorizacion savedProduct = repository.save(producto);
+        
+        return ResponseEntity.ok(savedProduct);
+    }
+
+    private void updateProductFromDTO(ProductCategorizacion producto, ProductoUpdateDTO dto) {
+        // Identificadores
+        if (dto.getUpc() != null) producto.setUpc(dto.getUpc());
+        if (dto.getNombreProducto() != null) producto.setNombreProducto(dto.getNombreProducto());
+        if (dto.getLaboratorio() != null) producto.setLaboratorio(dto.getLaboratorio());
+        if (dto.getCategoriaOriginal() != null) producto.setCategoriaOriginal(dto.getCategoriaOriginal());
+        if (dto.getPresentacionOriginal() != null) producto.setPresentacionOriginal(dto.getPresentacionOriginal().doubleValue());
+        if (dto.getNivelCompletacion() != null) producto.setNivelCompletacion(dto.getNivelCompletacion());
+
+        // Categorización
+        if (dto.getCategoryId() != null) producto.setCategoryId(dto.getCategoryId());
+        if (dto.getSubcategoryId() != null) producto.setSubcategoryId(dto.getSubcategoryId());
+        if (dto.getSpecific1Id() != null) producto.setSpecific1Id(dto.getSpecific1Id());
+        if (dto.getSpecific2Id() != null) producto.setSpecific2Id(dto.getSpecific2Id());
+        if (dto.getCategoriaPrincipal() != null) producto.setCategoriaPrincipal(dto.getCategoriaPrincipal());
+        if (dto.getSubcategoria1() != null) producto.setSubcategoria1(dto.getSubcategoria1());
+        if (dto.getSubcategoria2() != null) producto.setSubcategoria2(dto.getSubcategoria2());
+        if (dto.getSubcategoria3() != null) producto.setSubcategoria3(dto.getSubcategoria3());
+
+        // Atributos
+        if (dto.getFormaFarmaceutica() != null) producto.setFormaFarmaceutica(dto.getFormaFarmaceutica());
+        if (dto.getConcentracionDosis() != null) producto.setConcentracionDosis(dto.getConcentracionDosis());
+        if (dto.getContenidoEnvase() != null) producto.setContenidoEnvase(dto.getContenidoEnvase());
+        if (dto.getViaAdministracion() != null) producto.setViaAdministracion(dto.getViaAdministracion());
+        if (dto.getPoblacionDiana() != null) producto.setPoblacionDiana(dto.getPoblacionDiana());
+        if (dto.getTagsIndicaciones() != null) producto.setTagsIndicaciones(dto.getTagsIndicaciones());
+
+        // Regulatorios
+        if (dto.getPaisFabricacion() != null) producto.setPaisFabricacion(dto.getPaisFabricacion());
+        if (dto.getRequierePrescripcionMedica() != null) producto.setRequierePrescripcionMedica(dto.getRequierePrescripcionMedica());
+        if (dto.getEsPsicotropico() != null) producto.setEsPsicotropico(dto.getEsPsicotropico());
+        if (dto.getRequiereCadenaDeFrio() != null) producto.setRequiereCadenaDeFrio(dto.getRequiereCadenaDeFrio());
+
+        // Vademécum
+        if (dto.getPrincipioActivo() != null) producto.setPrincipioActivo(dto.getPrincipioActivo());
+        if (dto.getPatologia() != null) producto.setPatologia(dto.getPatologia());
+        if (dto.getPosologia() != null) producto.setPosologia(dto.getPosologia());
+        if (dto.getContraindicaciones() != null) producto.setContraindicaciones(dto.getContraindicaciones());
+        // Metadatos
+        producto.setFechaUltimaModificacion(ZonedDateTime.now(ZoneId.systemDefault()));
+        if (dto.getUsuarioUltimaModificacion() != null) {
+            producto.setUsuarioUltimaModificacion(dto.getUsuarioUltimaModificacion());
+        }
     }
 }

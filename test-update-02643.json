@@ -1,0 +1,13 @@
+{
+  "codigoInterno": "02643",
+  "nombreProducto": "BATEN 200MG X 5 CAPSULAS - ACTUALIZADO VIA API",
+  "descripcion": "Antifúngico de amplio espectro - Actualizado via REST API",
+  "principioActivo": "Fluconazol",
+  "concentracionDosis": "200mg",
+  "contenidoEnvase": "5 cápsulas",
+  "patologia": "Infecciones fúngicas sistémicas y dérmicas",
+  "posologia": "200mg dosis única semanal por 4-6 semanas",
+  "contraindicaciones": "Hipersensibilidad al fluconazol, embarazo",
+  "nivelCompletacion": 75,
+  "usuarioUltimaModificacion": "admin-api"
+}

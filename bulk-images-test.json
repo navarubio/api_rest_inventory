@@ -1,0 +1,19 @@
+{
+  "images": [
+    {
+      "rutaImagen": "/media/products/10628_505b2b2e-2116-444c-a75f-41fef249b25d.webp",
+      "orden": 1,
+      "altText": "Imagen principal del producto"
+    },
+    {
+      "rutaImagen": "/media/products/10628_a1b2c3d4-5678-90ef-ghij-klmnopqrstuv.webp",
+      "orden": 2,
+      "altText": "Vista secundaria del producto"
+    },
+    {
+      "rutaImagen": "/media/products/10628_12345678-abcd-efgh-ijkl-mnopqrstuvwx.webp",
+      "orden": 3,
+      "altText": "Detalle del producto"
+    }
+  ]
+}

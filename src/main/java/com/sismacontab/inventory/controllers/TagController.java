@@ -5,11 +5,11 @@ import com.sismacontab.inventory.repositories.TagRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tags")
 public class TagController {
-    
     private final TagRepository repository;
 
     public TagController(TagRepository repository) {
@@ -28,9 +28,15 @@ public class TagController {
     }
 
     @GetMapping("/activos")
-    @Cacheable("tagsActivos")
-    public List<Tag> getActivos() {
-        return repository.findByActivoTrue();
+    @Cacheable(value = "tagsActivos")
+    public List<Tag> getActivos(@RequestParam(required = false) Integer limit) {
+        List<Tag> tags = repository.findByActivoTrue();
+        if (limit != null && limit > 0) {
+            return tags.stream()
+                      .limit(limit)
+                      .collect(Collectors.toList());
+        }
+        return tags;
     }
 
     @GetMapping("/search")

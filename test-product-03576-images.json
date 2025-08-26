@@ -1,0 +1,14 @@
+{
+  "images": [
+    {
+      "rutaImagen": "/media/products/03576_159150028.webp",
+      "orden": 1,
+      "altText": "Imagen principal producto 03576"
+    },
+    {
+      "rutaImagen": "/media/products/03576_960014590.webp",
+      "orden": 2,
+      "altText": "Imagen secundaria producto 03576"
+    }
+  ]
+}

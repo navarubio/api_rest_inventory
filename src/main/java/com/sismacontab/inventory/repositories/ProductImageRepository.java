@@ -16,4 +16,7 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, Inte
     
     // Find images by alt text (useful for searching)
     List<ProductImage> findByAltTextContainingIgnoreCase(String altText);
+    
+    // Delete all images for a product
+    void deleteByCodigoInternoProducto(String codigoInternoProducto);
 }
