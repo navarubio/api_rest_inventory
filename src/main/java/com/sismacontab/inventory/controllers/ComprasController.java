@@ -1,7 +1,6 @@
 package com.sismacontab.inventory.controllers;
 
 import com.sismacontab.inventory.models.MasterLotes;
-import com.sismacontab.inventory.models.dto.OpenBravoDetalleDTO;
 import com.sismacontab.inventory.repositories.FacturaCompraRepository;
 import com.sismacontab.inventory.repositories.MasterLotesRepository;
 import com.sismacontab.inventory.repositories.TicketBuyLinesRepository;
@@ -36,14 +35,17 @@ public class ComprasController {
     }
 
     /**
-     * @api {get} /api/compras/proveedores Get Supplier List
-     * @apiName GetSuppliers
+     * @api {get} /api/compras/proveedores Get Unique Supplier List
+     * @apiName GetUniqueSuppliers
      * @apiGroup Compras
      *
-     * @apiSuccess {String[]} suppliers List of suppliers in 'id-name' format.
+     * @apiSuccess {String[]} suppliers List of unique supplier strings in 'id-name' format.
      * 
-     * @apiDescription This endpoint retrieves a list of suppliers with invoices
-     * that have a tax support code '06'.
+     * @apiDescription Retrieves a unique list of suppliers with '06' support code invoices.
+     * It groups by supplier ID (RUC) and selects the most recent company name to avoid duplicates
+     * caused by minor variations in the name.
+     * The SQL query uses a CTE (Common Table Expression) to rank suppliers by most recent invoice
+     * and applies INITCAP and TRIM for name normalization.
      */
     @GetMapping("/proveedores")
     public ResponseEntity<List<String>> getSuppliers() {
@@ -56,13 +58,13 @@ public class ComprasController {
     }
 
     /**
-     * @api {get} /api/compras/facturas Get Invoices by Supplier
+     * @api {get} /api/compras/facturas Get Invoices
      * @apiName GetInvoices
      * @apiGroup Compras
      *
-     * @apiParam {String} proveedorId Supplier ID
      * @apiParam {String} fechaInicio Start date (YYYY-MM-DD)
      * @apiParam {String} fechaFin End date (YYYY-MM-DD)
+     * @apiParam {String} [proveedorId] Supplier ID (optional)
      *
      * @apiSuccess {Object[]} invoices List of invoices
      * @apiSuccess {String} invoices.fechaFactura Invoice date
@@ -73,13 +75,13 @@ public class ComprasController {
      */
     @GetMapping("/facturas")
     public ResponseEntity<?> getInvoices(
-            @RequestParam String proveedorId,
             @RequestParam String fechaInicio,
-            @RequestParam String fechaFin) {
+            @RequestParam String fechaFin,
+            @RequestParam(required = false) String proveedorId) {
         
-        if (proveedorId == null || fechaInicio == null || fechaFin == null) {
+        if (fechaInicio == null || fechaFin == null) {
             Map<String, String> error = new HashMap<>();
-            error.put("error", "Missing required query parameters: proveedorId, fechaInicio, fechaFin");
+            error.put("error", "Missing required query parameters: fechaInicio, fechaFin");
             return ResponseEntity.badRequest().body(error);
         }
 
@@ -88,8 +90,17 @@ public class ComprasController {
             LocalDate startDate = LocalDate.parse(fechaInicio, formatter);
             LocalDate endDate = LocalDate.parse(fechaFin, formatter);
 
-            List<Object[]> results = facturaCompraRepository.findFacturasByProveedorAndDateRange(
-                    startDate, endDate, proveedorId);
+            List<Object[]> results;
+            
+            if (proveedorId != null && !proveedorId.trim().isEmpty()) {
+                // Si se proporciona proveedorId, buscar facturas de ese proveedor específico
+                results = facturaCompraRepository.findFacturasByProveedorAndDateRange(
+                        startDate, endDate, proveedorId);
+            } else {
+                // Si NO se proporciona proveedorId, buscar todas las facturas con sustento '06'
+                results = facturaCompraRepository.findFacturasBySustentoAndDateRange(
+                        startDate, endDate);
+            }
 
             List<Map<String, Object>> invoices = new ArrayList<>();
             for (Object[] row : results) {

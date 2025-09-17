@@ -53,7 +53,8 @@ public class KardexRepository {
             sql.append(" AND TO_TIMESTAMP(fecha_hora, 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP(:fechaDesde, 'DD/MM/YYYY')");
         }
         if (fechaHasta != null && !fechaHasta.isEmpty()) {
-            sql.append(" AND TO_TIMESTAMP(fecha_hora, 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP(:fechaHasta, 'DD/MM/YYYY')");
+            // Agregar 23:59:59 para incluir todo el día
+            sql.append(" AND TO_TIMESTAMP(fecha_hora, 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP(:fechaHasta || ' 23:59:59', 'DD/MM/YYYY HH24:MI:SS')");
         }
         if (tipodocumento != null && !tipodocumento.isEmpty()) {
             sql.append(" AND tipodocumento = :tipodocumento");
@@ -122,7 +123,8 @@ public class KardexRepository {
             sql.append(" AND TO_TIMESTAMP(fecha_hora, 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP(:fechaDesde, 'DD/MM/YYYY')");
         }
         if (fechaHasta != null && !fechaHasta.isEmpty()) {
-            sql.append(" AND TO_TIMESTAMP(fecha_hora, 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP(:fechaHasta, 'DD/MM/YYYY')");
+            // Agregar 23:59:59 para incluir todo el día
+            sql.append(" AND TO_TIMESTAMP(fecha_hora, 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP(:fechaHasta || ' 23:59:59', 'DD/MM/YYYY HH24:MI:SS')");
         }
         if (tipodocumento != null && !tipodocumento.isEmpty()) {
             sql.append(" AND tipodocumento = :tipodocumento");
