@@ -2,7 +2,6 @@ package com.sismacontab.inventory.repositories;
 
 import com.sismacontab.inventory.models.TicketBuyLines;
 import com.sismacontab.inventory.models.TicketBuyLinesId;
-import com.sismacontab.inventory.models.dto.OpenBravoDetalleDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,29 +18,35 @@ public interface TicketBuyLinesRepository extends JpaRepository<TicketBuyLines, 
      * @param estab Establecimiento
      * @param emision Punto de emisión
      * @param secuencial Secuencial
-     * @return Lista de productos desde OpenBravo
+     * @return Lista de productos desde OpenBravo con datos completos
      */
     @Query(value = 
         "SELECT " +
-        "ROW_NUMBER() OVER (ORDER BY tbl.line) AS id, " +
-        "p.id AS code, " +
-        "p.name AS nombre, " +
-        "p.presentacion AS presentacion, " +
-        "tbl.units AS cantidad, " +
-        "tbl.pricebuy AS precio, " +
-        "tbl.lote AS lote, " +
-        "tbl.fechaelaboracion AS fecha_fabricacion, " +
-        "tbl.fechavencimiento AS fecha_vencimiento, " +
-        "tbl.registrosanitario AS registro_sanit " +
+        "    ROW_NUMBER() OVER (ORDER BY tbl.line) AS \"ID\", " +
+        "    (rb.estab || '-' || rb.emision || '-' || rb.secuencial) AS \"Numero_Factura\", " +
+        "    CAST(rb.fecha AS DATE) AS \"Fecha_Factura\", " +
+        "    prov.searchkey AS \"RUC\", " +
+        "    prov.name AS \"Laboratorio\", " +
+        "    p.id AS \"Code\", " +
+        "    p.name AS \"Nombre\", " +
+        "    tbl.lote AS \"Lote\", " +
+        "    tbl.units AS \"Cantidad\", " +
+        "    p.presentacion AS \"Presentacion\", " +
+        "    tbl.registrosanitario AS \"Registro_Sanitario\", " +
+        "    tbl.fechaelaboracion AS \"Fecha_Elaboracion\", " +
+        "    tbl.fechavencimiento AS \"Fecha_Vencimiento\", " +
+        "    tbl.pricebuy AS \"Precio\", " +
+        "    tbl.ticket AS \"ticket\", " +
+        "    tbl.line AS \"Line\" " +
         "FROM fdw_vegfarm.ticketbuylines AS tbl " +
         "JOIN fdw_vegfarm.products AS p ON tbl.product = p.id " +
         "LEFT JOIN fdw_vegfarm.lotes AS l ON tbl.idlote = l.idlote " +
-        "JOIN fdw_vegfarm.recepcionbuy AS rb ON tbl.ticket = rb.id " +
+        "JOIN fdw_vegfarm.RECEPCIONBUY AS rb ON tbl.ticket = rb.id " +
         "JOIN fdw_vegfarm.proveedor AS prov ON rb.rucproveedor = prov.id " +
         "WHERE prov.searchkey = :ruc " +
-        "AND rb.estab = :estab " +
-        "AND rb.emision = :emision " +
-        "AND rb.secuencial = :secuencial " +
+        "  AND rb.estab = :estab " +
+        "  AND rb.emision = :emision " +
+        "  AND rb.secuencial = :secuencial " +
         "ORDER BY tbl.line",
         nativeQuery = true)
     List<Object[]> findOpenBravoDetailsByRucAndFacturaComponents(

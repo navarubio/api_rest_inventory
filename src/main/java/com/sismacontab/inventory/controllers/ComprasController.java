@@ -4,6 +4,7 @@ import com.sismacontab.inventory.models.MasterLotes;
 import com.sismacontab.inventory.repositories.FacturaCompraRepository;
 import com.sismacontab.inventory.repositories.MasterLotesRepository;
 import com.sismacontab.inventory.repositories.TicketBuyLinesRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -160,26 +161,32 @@ public class ComprasController {
      * @apiParam {String} ruc Supplier RUC
      * @apiParam {String} numeroFactura Invoice number (format: xxx-xxx-xxxxxxxxx)
      *
-     * @apiSuccess {Object[]} products List of products from OpenBravo
+     * @apiSuccess {Object[]} products List of products from OpenBravo with complete data
      * @apiSuccess {Number} products.ID Row number
+     * @apiSuccess {String} products.Numero_Factura Complete invoice number
+     * @apiSuccess {String} products.Fecha_Factura Invoice date
+     * @apiSuccess {String} products.RUC Supplier RUC
+     * @apiSuccess {String} products.Laboratorio Laboratory/supplier name
      * @apiSuccess {String} products.Code Product code
      * @apiSuccess {String} products.Nombre Product name
-     * @apiSuccess {Number} products.Presentación Presentation
-     * @apiSuccess {Number} products.Cantidad Quantity
-     * @apiSuccess {Number} products.Precio Price
      * @apiSuccess {String} products.Lote Batch number
-     * @apiSuccess {String} products.Fecha_fabricacion Manufacturing date
-     * @apiSuccess {String} products.Fecha_vencimiento Expiration date
-     * @apiSuccess {String} products.Registro_Sanit Sanitary registration
+     * @apiSuccess {Number} products.Cantidad Quantity
+     * @apiSuccess {String} products.Presentacion Presentation
+     * @apiSuccess {String} products.Registro_Sanitario Sanitary registration
+     * @apiSuccess {String} products.Fecha_Elaboracion Manufacturing date
+     * @apiSuccess {String} products.Fecha_Vencimiento Expiration date
+     * @apiSuccess {Number} products.Precio Price
+     * @apiSuccess {String} products.ticket Ticket ID (primary key)
+     * @apiSuccess {Number} products.Line Line number (primary key)
      */
     @GetMapping("/detalle-openbravo")
     public ResponseEntity<?> getOpenBravoDetails(
             @RequestParam String ruc,
             @RequestParam String numeroFactura) {
 
-        if (ruc == null || numeroFactura == null) {
+        if (ruc == null || ruc.trim().isEmpty() || numeroFactura == null || numeroFactura.trim().isEmpty()) {
             Map<String, String> error = new HashMap<>();
-            error.put("error", "Missing required query parameters: ruc, numeroFactura");
+            error.put("error", "Parámetros 'ruc' y 'numeroFactura' son requeridos.");
             return ResponseEntity.badRequest().body(error);
         }
 
@@ -188,7 +195,7 @@ public class ComprasController {
             String[] parts = numeroFactura.split("-");
             if (parts.length != 3) {
                 Map<String, String> error = new HashMap<>();
-                error.put("error", "Invalid numeroFactura format. Expected xxx-xxx-xxxxxxxxx");
+                error.put("error", "Formato de 'numeroFactura' inválido. Se esperaba xxx-xxx-xxxxxxxxx");
                 return ResponseEntity.badRequest().body(error);
             }
 
@@ -199,27 +206,36 @@ public class ComprasController {
             List<Object[]> results = ticketBuyLinesRepository.findOpenBravoDetailsByRucAndFacturaComponents(
                     ruc, estab, emision, secuencial);
 
+            // Mapeo usando Map<String, Object> como originalmente, pero con los campos nuevos
             List<Map<String, Object>> products = new ArrayList<>();
             for (Object[] row : results) {
                 Map<String, Object> product = new HashMap<>();
                 product.put("ID", row[0]);
-                product.put("Code", row[1]);
-                product.put("Nombre", row[2]);
-                product.put("Presentación", row[3]);
-                product.put("Cantidad", row[4]);
-                product.put("Precio", row[5]);
-                product.put("Lote", row[6]);
-                product.put("Fecha_fabricacion", row[7]);
-                product.put("Fecha_vencimiento", row[8]);
-                product.put("Registro_Sanit", row[9]);
+                product.put("Numero_Factura", row[1]);
+                product.put("Fecha_Factura", row[2] != null ? row[2].toString() : null);
+                product.put("RUC", row[3]);
+                product.put("Laboratorio", row[4]);
+                product.put("Code", row[5]);
+                product.put("Nombre", row[6]);
+                product.put("Lote", row[7]);
+                product.put("Cantidad", row[8]);
+                product.put("Presentacion", row[9]);
+                product.put("Registro_Sanitario", row[10]);
+                product.put("Fecha_Elaboracion", row[11] != null ? row[11].toString() : null);
+                product.put("Fecha_Vencimiento", row[12] != null ? row[12].toString() : null);
+                product.put("Precio", row[13]);
+                product.put("ticket", row[14]);
+                product.put("Line", row[15]);
                 products.add(product);
             }
 
             return ResponseEntity.ok(products);
+
         } catch (Exception e) {
+            // Log del error para depuración en el servidor
             Map<String, String> error = new HashMap<>();
             error.put("error", "Error fetching OpenBravo details: " + e.getMessage());
-            return ResponseEntity.status(500).body(error);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
 }
